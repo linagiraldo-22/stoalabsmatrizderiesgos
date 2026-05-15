@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EUNOia · Matriz de Riesgos GTC-45</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.6.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --purple:#7B52AB;--purple-d:#5a3a85;--purple-l:#f0ebf8;--purple-m:#c4a8e3;
+  --danger:#c0392b;--warning:#d4861b;--ok:#1a7a4a;--info:#2980b9;
+  --bg:#ffffff;--bg2:#f7f5fb;
+  --text:#1a1a2e;--muted:#6b6880;--border:rgba(123,82,171,0.15);
+  --radius:12px;--radius-sm:8px;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#16121f;--bg2:#1e1830;--text:#e8e4f0;--muted:#a09ab5;--border:rgba(196,168,227,0.18);--purple-l:#2a1f3d;}
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg2);color:var(--text);min-height:100vh;padding:0 0 60px}
+
+/* TOPBAR */
+.topbar{background:var(--purple);color:#fff;padding:12px 28px;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.topbar-logo-img{height:36px;width:36px;border-radius:8px;object-fit:contain;background:#fff;padding:3px;display:none}
+.topbar-brand{font-size:15px;font-weight:700;letter-spacing:.04em}
+.topbar-brand span{opacity:.6;font-weight:400;font-size:12px;margin-left:8px}
+.topbar-right{font-size:11px;opacity:.7;text-align:right;line-height:1.7}
+
+/* SESIÓN BANNER */
+.session-banner{background:var(--purple-l);border:.5px solid var(--purple-m);border-radius:var(--radius);padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.session-banner-text{font-size:12px;color:var(--purple-d);font-weight:500;display:flex;align-items:center;gap:8px}
+.session-banner-actions{display:flex;gap:8px;flex-shrink:0}
+.btn-sm{padding:6px 14px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;display:flex;align-items:center;gap:5px;transition:all .2s}
+.btn-sm-purple{background:var(--purple);color:#fff}
+.btn-sm-purple:hover{background:var(--purple-d)}
+.btn-sm-outline{background:transparent;color:var(--purple);border:.5px solid var(--purple)}
+.btn-sm-outline:hover{background:var(--purple-l)}
+
+/* WRAPPER */
+.wrapper{max-width:840px;margin:0 auto;padding:24px 16px}
+
+/* PROGRESS */
+.progress-shell{background:var(--bg);border-radius:var(--radius);border:.5px solid var(--border);padding:20px 24px;margin-bottom:20px;box-shadow:0 2px 16px rgba(123,82,171,.07)}
+.prog-steps{display:flex;margin-bottom:14px;position:relative}
+.prog-steps::before{content:'';position:absolute;top:14px;left:0;right:0;height:2px;background:var(--border);z-index:0}
+.prog-fill{position:absolute;top:14px;left:0;height:2px;background:var(--purple);z-index:1;transition:width .4s ease}
+.step-dot{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;z-index:2}
+.step-dot .dot{width:28px;height:28px;border-radius:50%;border:2px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--muted);transition:all .3s}
+.step-dot.done .dot{background:var(--purple);border-color:var(--purple);color:#fff}
+.step-dot.active .dot{background:var(--purple);border-color:var(--purple);color:#fff;box-shadow:0 0 0 4px rgba(123,82,171,.2)}
+.step-dot .lbl{font-size:10px;color:var(--muted);margin-top:5px;white-space:nowrap;text-align:center}
+.step-dot.active .lbl,.step-dot.done .lbl{color:var(--purple);font-weight:500}
+.prog-info{display:flex;justify-content:space-between;align-items:center}
+.prog-title{font-size:13px;font-weight:600;color:var(--text)}
+.prog-sub{font-size:11px;color:var(--muted)}
+
+/* CARDS */
+.card{background:var(--bg);border-radius:var(--radius);border:.5px solid var(--border);padding:24px 28px;margin-bottom:16px;box-shadow:0 2px 16px rgba(123,82,171,.06)}
+.card-title{font-size:14px;font-weight:600;color:var(--purple);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.card-title i{font-size:18px}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.form-grid{grid-template-columns:1fr}}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.field input,.field select{background:var(--bg2);border:.5px solid var(--border);border-radius:var(--radius-sm);padding:10px 13px;font-size:13px;color:var(--text);font-family:inherit;transition:border .2s;outline:none;width:100%}
+.field input:focus,.field select:focus{border-color:var(--purple);box-shadow:0 0 0 3px rgba(123,82,171,.12)}
+.field select option{background:var(--bg);color:var(--text)}
+
+/* LOGO UPLOAD */
+.logo-upload-area{border:1.5px dashed var(--purple-m);border-radius:var(--radius-sm);padding:16px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg2);position:relative}
+.logo-upload-area:hover{border-color:var(--purple);background:var(--purple-l)}
+.logo-upload-area input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.logo-preview{width:60px;height:60px;object-fit:contain;border-radius:6px;display:none;margin:0 auto 6px}
+.logo-upload-text{font-size:11px;color:var(--muted)}
+.logo-upload-text b{color:var(--purple)}
+
+/* INTRO BOX */
+.intro-box{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;padding:10px 14px;background:var(--purple-l);border-radius:var(--radius-sm);border-left:3px solid var(--purple)}
+
+/* COLABORADORES */
+.colab-list{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;min-height:40px}
+.colab-card{background:var(--bg2);border-radius:var(--radius-sm);border:.5px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:14px}
+.colab-avatar{width:36px;height:36px;border-radius:50%;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.colab-info{flex:1}
+.colab-name{font-size:13px;font-weight:600;color:var(--text)}
+.colab-role{font-size:11px;color:var(--muted);margin-top:2px}
+.colab-actions{display:flex;gap:6px}
+.empty{text-align:center;padding:24px;color:var(--muted)}
+.empty i{font-size:32px;display:block;margin-bottom:8px;opacity:.35}
+.empty p{font-size:12px}
+
+/* RIESGOS */
+.riesgo-group{display:flex;flex-direction:column;gap:14px}
+.riesgo-item{background:var(--bg2);border-radius:var(--radius-sm);padding:14px 16px;border:.5px solid var(--border)}
+.riesgo-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.riesgo-name{font-size:12px;font-weight:600}
+.riesgo-badge{font-size:10px;font-weight:600;padding:2px 9px;border-radius:20px}
+.rb-bio{background:#fef3e0;color:#8a5a00}
+.rb-psi{background:var(--purple-l);color:var(--purple-d)}
+.rb-ele{background:#fde8e8;color:#8a1a1a}
+.rb-qui{background:#e8f5e8;color:#2a6a2a}
+.rb-fis{background:#e3f0fb;color:#1a4a7a}
+.rb-mec{background:#fff3e0;color:#8a4a00}
+.rb-bio2{background:#f3e8ff;color:#5a2a8a}
+.rb-loc{background:#fde8e8;color:#7a1a1a}
+.slider-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.slider-field{display:flex;flex-direction:column;gap:4px}
+.slider-field label{font-size:10px;color:var(--muted);font-weight:500}
+.slider-field input[type=range]{width:100%;accent-color:var(--purple);cursor:pointer}
+.slider-val{font-size:12px;font-weight:700;color:var(--purple)}
+.nr-display{margin-top:10px;display:flex;align-items:center;gap:10px}
+.nr-num{font-size:18px;font-weight:700}
+.nivel{display:inline-block;border-radius:4px;padding:2px 9px;font-size:10px;font-weight:700}
+.niv-muyalto{background:#fde8e8;color:var(--danger)}
+.niv-alto{background:#fef3e0;color:var(--warning)}
+.niv-medio{background:#e3f0fb;color:var(--info)}
+.niv-bajo{background:#e4f5ed;color:var(--ok)}
+
+/* BUTTONS */
+.btn-row{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;flex-wrap:wrap}
+.btn{padding:10px 20px;border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .2s;font-family:inherit;display:flex;align-items:center;gap:6px}
+.btn-primary{background:var(--purple);color:#fff}
+.btn-primary:hover{background:var(--purple-d)}
+.btn-outline{background:transparent;color:var(--purple);border:.5px solid var(--purple)}
+.btn-outline:hover{background:var(--purple-l)}
+.btn-danger{background:transparent;color:var(--danger);border:.5px solid var(--danger);padding:7px 14px;font-size:12px}
+.btn-danger:hover{background:#fde8e8}
+.btn-success{background:var(--ok);color:#fff}
+.btn-success:hover{background:#155c38}
+
+/* RESULTADO */
+.matrix-wrap{overflow-x:auto;margin-bottom:16px}
+table.gtc{width:100%;border-collapse:collapse;font-size:11px;min-width:760px}
+table.gtc th{background:var(--purple);color:#fff;padding:9px 10px;text-align:left;font-weight:600;white-space:nowrap}
+table.gtc td{padding:8px 10px;border-bottom:.5px solid var(--border);vertical-align:top;font-size:11px}
+table.gtc td:last-child,table.gtc th:last-child{white-space:nowrap;min-width:95px}
+table.gtc tr:hover td{background:var(--purple-l)}
+table.gtc .emp-cell{font-weight:600;color:var(--purple)}
+.bar-outer{height:5px;background:var(--border);border-radius:3px;width:48px;display:inline-block;vertical-align:middle;margin-left:4px}
+.bar-inner{height:5px;border-radius:3px;display:block}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+@media(max-width:500px){.kpi-row{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--bg2);border-radius:var(--radius-sm);padding:12px 14px}
+.kpi-label{font-size:10px;color:var(--muted);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.kpi-val{font-size:22px;font-weight:700}
+.kpi-val.danger{color:var(--danger)}.kpi-val.warning{color:var(--warning)}.kpi-val.ok{color:var(--ok)}.kpi-val.purple{color:var(--purple)}
+.resumen-header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.resumen-seal{width:46px;height:46px;border-radius:50%;background:var(--purple);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.resumen-seal i{color:#fff;font-size:20px}
+.resumen-logo{height:46px;width:auto;max-width:120px;object-fit:contain;border-radius:6px;border:.5px solid var(--border);padding:4px;background:#fff;display:none}
+.resumen-title{font-size:15px;font-weight:700;color:var(--purple)}
+.resumen-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.resumen-body{font-size:12px;line-height:1.8;border-left:3px solid var(--purple);padding-left:14px;margin-bottom:16px;color:var(--text)}
+.checklist{display:flex;flex-direction:column}
+.check-item{display:flex;align-items:flex-start;gap:9px;font-size:12px;padding:8px 0;border-bottom:.5px solid var(--border);line-height:1.5}
+.check-item:last-child{border-bottom:none}
+.check-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.prog-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:5px}
+.prog-bar-label span:last-child{font-weight:700;color:var(--purple)}
+.prog-outer{height:8px;background:var(--border);border-radius:4px;margin-bottom:16px}
+.prog-inner{height:8px;border-radius:4px;background:var(--purple);transition:width .6s ease}
+.int-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.int-grid{grid-template-columns:1fr}}
+.int-card{background:var(--bg2);border-radius:var(--radius-sm);padding:14px 16px;border-left:3px solid var(--purple)}
+.int-card h3{font-size:12px;font-weight:600;color:var(--purple);margin-bottom:6px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.int-card p{font-size:11px;color:var(--muted);line-height:1.6}
+.chip{display:inline-block;font-size:10px;border-radius:3px;padding:1px 7px;font-weight:600}
+.chip-ai{background:var(--purple-l);color:var(--purple-d)}
+.chip-auto{background:#e4f5ed;color:var(--ok)}
+.chip-legal{background:#e3f0fb;color:#1a4a7a}
+.sector-tag{display:inline-flex;align-items:center;gap:5px;background:var(--purple-l);color:var(--purple-d);border-radius:20px;padding:3px 10px;font-size:11px;font-weight:600;margin-bottom:12px}
+
+/* PRINT */
+@media print{
+  .topbar,.progress-shell,.btn-row,.colab-actions,.session-banner{display:none!important}
+  body{background:#fff;padding:0}
+  .card{box-shadow:none;border:1px solid #ddd;break-inside:avoid;page-break-inside:avoid;margin-bottom:12px}
+  .matrix-wrap{overflow:visible}
+  table.gtc{min-width:100%;font-size:9px;table-layout:fixed}
+  table.gtc th,table.gtc td{padding:5px 6px;word-break:break-word}
+  table.gtc td:last-child,table.gtc th:last-child{min-width:70px;width:70px;white-space:normal}
+  .topbar-logo-img{display:block!important}
+  .resumen-logo{display:block!important}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <img id="topbarLogoImg" class="topbar-logo-img" src="" alt="Logo">
+    <div>
+      <div class="topbar-brand">EUNOia <span>SST Labs</span></div>
+    </div>
+  </div>
+  <div class="topbar-right">Matriz de Riesgos GTC-45<br>Módulo interactivo 2026</div>
+</div>
+
+<div class="wrapper">
+
+<!-- BANNER DE SESIÓN (oculto inicialmente) -->
+<div class="session-banner" id="sessionBanner" style="display:none">
+  <div class="session-banner-text"><i class="ti ti-device-floppy"></i> <span id="sessionBannerText">Se encontró una sesión guardada.</span></div>
+  <div class="session-banner-actions">
+    <button class="btn-sm btn-sm-purple" onclick="cargarSesion()"><i class="ti ti-refresh"></i> Continuar</button>
+    <button class="btn-sm btn-sm-outline" onclick="descartarSesion()"><i class="ti ti-trash"></i> Nueva matriz</button>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+<div class="progress-shell">
+  <div class="prog-steps" id="progSteps">
+    <div class="step-dot active" id="sd0"><div class="dot">1</div><div class="lbl">Empresa</div></div>
+    <div class="step-dot" id="sd1"><div class="dot">2</div><div class="lbl">Colaboradores</div></div>
+    <div class="step-dot" id="sd2"><div class="dot">3</div><div class="lbl">Riesgos</div></div>
+    <div class="step-dot" id="sd3"><div class="dot"><i class="ti ti-check" style="font-size:12px"></i></div><div class="lbl">Resultado</div></div>
+    <div class="prog-fill" id="progFill" style="width:0%"></div>
+  </div>
+  <div class="prog-info">
+    <div class="prog-title" id="progTitle">Paso 1 de 4 — Datos de la empresa</div>
+    <div class="prog-sub" id="progSub">Complete la información general antes de continuar</div>
+  </div>
+</div>
+
+<!-- ════ PASO 1: EMPRESA ════ -->
+<div id="step0">
+  <div class="card">
+    <div class="card-title"><i class="ti ti-building"></i> Información de la empresa</div>
+    <div class="intro-box"><i class="ti ti-info-circle"></i> Complete los datos de la organización. Se guardarán automáticamente para que pueda continuar después.</div>
+
+    <!-- LOGO UPLOAD -->
+    <div style="margin-bottom:18px">
+      <div class="field" style="margin-bottom:0">
+        <label>Logo de la empresa (opcional)</label>
+      </div>
+      <div class="logo-upload-area" id="logoUploadArea" onclick="document.getElementById('logoFileInput').click()">
+        <input type="file" id="logoFileInput" accept="image/*" style="display:none" onchange="handleLogoUpload(event)">
+        <img id="logoPreviewImg" class="logo-preview" src="" alt="Logo preview">
+        <div class="logo-upload-text" id="logoUploadText"><i class="ti ti-upload" style="font-size:22px;color:var(--purple-m);display:block;margin-bottom:4px"></i><b>Haz clic para subir</b> el logo de tu cliente<br>PNG, JPG, SVG · Máx 2MB</div>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field"><label>Razón social</label><input type="text" id="empNombre" placeholder="Ej: ILÓGICA SAS"></div>
+      <div class="field"><label>NIT</label><input type="text" id="empNit" placeholder="Ej: 900.123.456-7"></div>
+      <div class="field">
+        <label>Sector económico</label>
+        <select id="empSectorSel" onchange="syncSectorInput()">
+          <option value="">— Selecciona un sector —</option>
+          <option value="Tecnología / Software">Tecnología / Software</option>
+          <option value="Construcción">Construcción</option>
+          <option value="Salud y Servicios Médicos">Salud y Servicios Médicos</option>
+          <option value="Manufactura e Industria">Manufactura e Industria</option>
+          <option value="Comercio y Retail">Comercio y Retail</option>
+          <option value="Educación">Educación</option>
+          <option value="Consultoría y Servicios Profesionales">Consultoría y Servicios Profesionales</option>
+          <option value="Logística y Transporte">Logística y Transporte</option>
+          <option value="Otro">Otro (escribir abajo)</option>
+        </select>
+      </div>
+      <div class="field"><label>Sector (confirmar o personalizar)</label><input type="text" id="empSector" placeholder="Ej: Consultoría Digital"></div>
+      <div class="field">
+        <label>Clase de riesgo ARL</label>
+        <select id="empRiesgo">
+          <option value="I">Clase I — Riesgo mínimo</option>
+          <option value="II">Clase II — Riesgo bajo</option>
+          <option value="III">Clase III — Riesgo medio</option>
+          <option value="IV">Clase IV — Riesgo alto</option>
+          <option value="V">Clase V — Riesgo máximo</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Modalidad de trabajo</label>
+        <select id="empModalidad">
+          <option value="Remoto (100%)">Remoto (100%)</option>
+          <option value="Híbrido">Híbrido</option>
+          <option value="Presencial">Presencial</option>
+        </select>
+      </div>
+      <div class="field"><label>Ciudad / Municipio</label><input type="text" id="empCiudad" placeholder="Ej: Medellín, Antioquia"></div>
+      <div class="field"><label>Responsable SG-SST</label><input type="text" id="empResponsable" placeholder="Nombre del responsable"></div>
+      <div class="field"><label>ARL afiliada</label><input type="text" id="empArl" placeholder="Ej: Sura, Positiva, Colmena..."></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="goStep(1)"><i class="ti ti-arrow-right"></i> Continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PASO 2: COLABORADORES ════ -->
+<div id="step1" style="display:none">
+  <div class="card">
+    <div class="card-title"><i class="ti ti-users"></i> Registro de colaboradores</div>
+    <div id="colabList" class="colab-list"></div>
+
+    <div style="border-top:.5px solid var(--border);padding-top:18px;margin-top:6px">
+      <div class="card-title" style="margin-bottom:14px;font-size:13px"><i class="ti ti-user-plus"></i> Nuevo colaborador</div>
+      <div class="form-grid">
+        <div class="field"><label>Nombre completo</label><input type="text" id="cNombre" placeholder="Ej: Laura Gómez"></div>
+        <div class="field"><label>Cargo / Puesto</label><input type="text" id="cCargo" placeholder="Ej: Dev Backend"></div>
+        <div class="field"><label>Proceso al que pertenece</label><input type="text" id="cProceso" placeholder="Ej: Desarrollo de Software"></div>
+        <div class="field">
+          <label>Antigüedad</label>
+          <select id="cAntiguedad">
+            <option>Menos de 1 año</option><option>1 a 3 años</option>
+            <option>3 a 5 años</option><option>Más de 5 años</option>
+          </select>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:14px">
+        <button class="btn btn-outline" onclick="agregarColab()"><i class="ti ti-plus"></i> Agregar colaborador</button>
+      </div>
+    </div>
+    <div class="btn-row" style="border-top:.5px solid var(--border);padding-top:16px;margin-top:8px">
+      <button class="btn btn-outline" onclick="goStep(0)"><i class="ti ti-arrow-left"></i> Atrás</button>
+      <button class="btn btn-primary" onclick="goStep(2)"><i class="ti ti-arrow-right"></i> Continuar a riesgos</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PASO 3: RIESGOS ════ -->
+<div id="step2" style="display:none">
+  <div class="card" id="riesgoCard"></div>
+  <div class="btn-row">
+    <button class="btn btn-outline" onclick="anteriorColab()"><i class="ti ti-arrow-left"></i> Atrás</button>
+    <button class="btn btn-primary" id="btnSigColab" onclick="siguienteColab()"><i class="ti ti-arrow-right"></i> Siguiente colaborador</button>
+  </div>
+</div>
+
+<!-- ════ PASO 4: RESULTADO ════ -->
+<div id="step3" style="display:none">
+
+  <div class="card">
+    <div class="resumen-header">
+      <div class="resumen-seal" id="resSeal"><i class="ti ti-certificate"></i></div>
+      <img id="resLogoImg" class="resumen-logo" src="" alt="Logo empresa">
+      <div>
+        <div class="resumen-title" id="resTitle">Matriz de Riesgos GTC-45</div>
+        <div class="resumen-sub" id="resSub">Generado · EUNOia SST Labs 2026</div>
+      </div>
+    </div>
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="resumen-body" id="resBody"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="ti ti-table"></i> Matriz GTC-45 — Valoración de riesgos</div>
+    <div class="matrix-wrap">
+      <table class="gtc" id="tablaGtc">
+        <thead><tr>
+          <th>Colaborador</th><th>Proceso</th><th>Peligro</th><th>Efecto potencial</th>
+          <th>P</th><th>C</th><th>NR</th><th>Nivel</th><th>Prioridad</th>
+        </tr></thead>
+        <tbody id="gtcBody"></tbody>
+      </table>
+    </div>
+    <div style="font-size:10.5px;color:var(--muted);margin-top:8px;line-height:1.7">
+      <b>GTC-45:</b> NR = P × C · Probabilidad 1–6 · Consecuencia 1–6 · NR ≥ 20: Muy Alto · 15–19: Alto · 8–14: Medio · ≤ 7: Bajo
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="ti ti-shield-check"></i> Cumplimiento · Circular 0027</div>
+    <div class="prog-bar-label"><span>Estándares Mínimos SG-SST (Clase I)</span><span id="pctLabel">0%</span></div>
+    <div class="prog-outer"><div class="prog-inner" id="progCumpl" style="width:0%"></div></div>
+    <div class="checklist" id="checkList"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="ti ti-robot"></i> Intervenciones recomendadas por IA</div>
+    <div class="int-grid" id="intervencionesBox"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-danger" onclick="reiniciar()"><i class="ti ti-refresh"></i> Nueva matriz</button>
+    <button class="btn btn-outline" onclick="goStep(0)"><i class="ti ti-building"></i> Editar empresa</button>
+    <button class="btn btn-outline" onclick="goStep(1)"><i class="ti ti-users"></i> Editar colaboradores</button>
+    <button class="btn btn-outline" onclick="editarRiesgos()"><i class="ti ti-shield"></i> Editar riesgos</button>
+    <button class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer"></i> Imprimir / PDF</button>
+  </div>
+</div>
+
+</div><!-- /wrapper -->
+
+<script>
+// ════════════════════════════════════════
+// ESTADO GLOBAL
+// ════════════════════════════════════════
+var empresa = {};
+var colaboradores = [];
+var colabActual = 0;
+var logoDataUrl = '';
+var STORAGE_KEY = 'eunoia_matriz_v2';
+
+// ════════════════════════════════════════
+// RIESGOS POR SECTOR GTC-45
+// ════════════════════════════════════════
+var RIESGOS_SECTORES = {
+  'default': [
+    {id:'bio',label:'Biomecánico',badge:'rb-bio',peligro:'Postura sedente prolongada, repetitividad en miembros superiores',efecto:'Síndrome túnel carpiano, lumbago crónico, cervicalgia'},
+    {id:'psi',label:'Psicosocial',badge:'rb-psi',peligro:'Sobrecarga cognitiva, hiperconectividad, aislamiento social',efecto:'Burnout, ansiedad, trastorno adaptativo, insomnio'},
+    {id:'ele',label:'Eléctrico-Locativo',badge:'rb-ele',peligro:'Instalaciones eléctricas domiciliarias sobrecargadas o deficientes',efecto:'Incendio, electrocución, daño de equipos'},
+  ],
+  'Tecnología / Software': [
+    {id:'bio',label:'Biomecánico',badge:'rb-bio',peligro:'Postura sedente prolongada, repetitividad en MMSS, pantallas sin regulación de altura',efecto:'Síndrome túnel carpiano, lumbago, cervicalgia, astenopia'},
+    {id:'psi',label:'Psicosocial',badge:'rb-psi',peligro:'Sobrecarga cognitiva, hiperconectividad, burnout por sprints intensivos',efecto:'Burnout, ansiedad, insomnio, trastorno adaptativo'},
+    {id:'ele',label:'Eléctrico-Locativo',badge:'rb-ele',peligro:'Regletas sobrecargadas en domicilio, cables deteriorados',efecto:'Incendio, electrocución, daño de equipos TI'},
+  ],
+  'Construcción': [
+    {id:'mec',label:'Mecánico',badge:'rb-mec',peligro:'Manejo de herramientas y maquinaria, trabajo en alturas',efecto:'Amputaciones, fracturas, trauma craneoencefálico, muerte'},
+    {id:'fis',label:'Físico',badge:'rb-fis',peligro:'Exposición a ruido por maquinaria, vibraciones cuerpo entero',efecto:'Hipoacusia neurosensorial, enfermedad osteomuscular'},
+    {id:'loc',label:'Locativo',badge:'rb-loc',peligro:'Superficies irregulares, excavaciones, andamios en mal estado',efecto:'Caídas al mismo/diferente nivel, sepultamiento'},
+    {id:'qui',label:'Químico',badge:'rb-qui',peligro:'Exposición a polvo de sílice, cemento, pinturas con solventes',efecto:'Silicosis, dermatitis, enfermedad respiratoria crónica'},
+    {id:'psi',label:'Psicosocial',badge:'rb-psi',peligro:'Alta demanda física, trabajo bajo presión de tiempo',efecto:'Estrés laboral, accidentalidad por fatiga'},
+  ],
+  'Salud y Servicios Médicos': [
+    {id:'bio2',label:'Biológico',badge:'rb-bio2',peligro:'Contacto con fluidos corporales, material contaminado, patógenos',efecto:'Hepatitis B/C, VIH, tuberculosis, COVID-19'},
+    {id:'bio',label:'Biomecánico',badge:'rb-bio',peligro:'Movilización de pacientes, postura prolongada de pie',efecto:'Lumbago, hernias discales, síndrome de fatiga crónica'},
+    {id:'psi',label:'Psicosocial',badge:'rb-psi',peligro:'Exposición a muerte y sufrimiento, turnos extendidos nocturnos',efecto:'Síndrome de burnout, depresión, trastorno de estrés'},
+    {id:'qui',label:'Químico',badge:'rb-qui',peligro:'Exposición a medicamentos citostáticos, desinfectantes y gases anestésicos',efecto:'Cáncer, dermatitis, afectación reproductiva'},
+    {id:'fis',label:'Físico',badge:'rb-fis',peligro:'Exposición a radiaciones ionizantes (rayos X, gammagrafia)',efecto:'Leucemia, cataratas, mutaciones genéticas'},
+  ],
+  'Manufactura e Industria': [
+    {id:'mec',label:'Mecánico',badge:'rb-mec',peligro:'Maquinaria sin guardas, atrapamientos, proyección de partículas',efecto:'Amputaciones, aplastamientos, trauma ocular'},
+    {id:'fis',label:'Físico',badge:'rb-fis',peligro:'Ruido industrial, altas temperaturas, iluminación deficiente',efecto:'Hipoacusia, golpe de calor, fatiga visual'},
+    {id:'qui',label:'Químico',badge:'rb-qui',peligro:'Solventes, pinturas, gases industriales, metales pesados',efecto:'Intoxicación, cáncer ocupacional, enfermedad respiratoria'},
+    {id:'bio',label:'Biomecánico',badge:'rb-bio',peligro:'Levantamiento manual de cargas, posturas forzadas repetitivas',efecto:'Hernias, lumbago crónico, síndrome de manguito rotador'},
+    {id:'ele',label:'Eléctrico',badge:'rb-ele',peligro:'Equipos de alta tensión, conexiones sin mantenimiento',efecto:'Electrocución, quemaduras, incendio industrial'},
+  ],
+  'Comercio y Retail': [
+    {id:'bio',label:'Biomecánico',badge:'rb-bio',peligro:'Trabajo prolongado de pie, carga y descarga de mercancía',efecto:'Várices, lumbago, lesiones en MMII'},
+    {id:'psi',label:'Psicosocial',badge:'rb-psi',peligro:'Atención al público, acoso del cliente, alta demanda emocional',efecto:'Estrés laboral, burnout, ansiedad'},
+    {id:'loc',label:'Locativo',badge:'rb-loc',peligro:'Pisos húmedos, estanterías sobrecargadas, pasillos obstruidos',efecto:'Caídas, golpes, aplastamiento por colapso de estantes'},
+    {id:'ele',label:'Eléctrico',badge:'rb-ele',peligro:'Instalaciones eléctricas sobrecargadas, equipos de refrigeración',efecto:'Incendio, electrocución'},
+  ],
+  'Educación': [
+    {id:'bio',label:'Biomecánico',badge:'rb-bio',peligro:'Postura de pie prolongada, uso de voz sin técnica vocal',efecto:'Disfonía, nódulos vocales, lumbago'},
+    {id:'psi',label:'Psicosocial',badge:'rb-psi',peligro:'Alta carga académica, violencia escolar, trabajo emocional',efecto:'Burnout docente, depresión, ansiedad crónica'},
+    {id:'fis',label:'Físico',badge:'rb-fis',peligro:'Iluminación deficiente en aulas, ruido ambiental alto',efecto:'Fatiga visual, pérdida de audición, estrés por ruido'},
+    {id:'loc',label:'Locativo',badge:'rb-loc',peligro:'Infraestructura deteriorada, canchas sin mantenimiento',efecto:'Caídas, golpes, accidentes estudiantiles'},
+  ],
+  'Consultoría y Servicios Profesionales': [
+    {id:'bio',label:'Biomecánico',badge:'rb-bio',peligro:'Trabajo sedente prolongado, postura inadecuada frente a pantallas',efecto:'Cervicalgia, lumbago, síndrome túnel carpiano'},
+    {id:'psi',label:'Psicosocial',badge:'rb-psi',peligro:'Alta demanda cognitiva, multicliente, plazos de entrega estrictos',efecto:'Estrés crónico, burnout, trastorno del sueño'},
+    {id:'ele',label:'Eléctrico-Locativo',badge:'rb-ele',peligro:'Instalaciones eléctricas en oficinas y domicilios, equipos sin UPS',efecto:'Pérdida de información, incendio, daño de equipos'},
+  ],
+  'Logística y Transporte': [
+    {id:'mec',label:'Mecánico / Tránsito',badge:'rb-mec',peligro:'Conducción de vehículos, mantenimiento de flota',efecto:'Accidente de tránsito, atrapamiento, volcamiento'},
+    {id:'bio',label:'Biomecánico',badge:'rb-bio',peligro:'Carga y descarga manual, vibración por conducción prolongada',efecto:'Hernias, lumbago, lesiones osteomusculares'},
+    {id:'psi',label:'Psicosocial',badge:'rb-psi',peligro:'Jornadas extensas, trabajo nocturno, presión por rutas',efecto:'Microsueños, fatiga, trastornos del sueño'},
+    {id:'fis',label:'Físico',badge:'rb-fis',peligro:'Exposición a temperaturas extremas en bodegaje',efecto:'Golpe de calor, hipotermia, enfermedad respiratoria'},
+  ],
+};
+
+function getRiesgosDef(){
+  var sector = empresa.sector || '';
+  return RIESGOS_SECTORES[sector] || RIESGOS_SECTORES['Consultoría y Servicios Profesionales'] || RIESGOS_SECTORES['default'];
+}
+
+var INTERVENCIONES_DB = {
+  bio:{titulo:'Pausas activas inteligentes',icon:'ti-clock-pause',chip:'IA',chipCls:'chip-ai',desc:'Integración con Slack/Jira: detecta sesiones continuas >45 min y dispara recordatorio. Rutina de 5 min con ejercicios oculares y cervicales.'},
+  psi:{titulo:'Monitor psicosocial',icon:'ti-mood-heart',chip:'IA',chipCls:'chip-ai',desc:'Check-in semanal automatizado. Si el score supera 70/100, alerta al responsable SST y activa protocolo de desconexión digital.'},
+  ele:{titulo:'Inspección eléctrica remota',icon:'ti-bolt',chip:'Auto',chipCls:'chip-auto',desc:'Checklist fotográfico por domicilio. IA analiza imágenes y emite concepto técnico con recomendaciones de corrección.'},
+  mec:{titulo:'Protocolo de seguridad mecánica',icon:'ti-tool',chip:'Legal',chipCls:'chip-legal',desc:'Permisos de trabajo para tareas de alto riesgo, inspección pre-operacional de equipos y capacitación en uso seguro de herramientas.'},
+  fis:{titulo:'Monitoreo de agentes físicos',icon:'ti-wave-sine',chip:'Auto',chipCls:'chip-auto',desc:'Mediciones periódicas de ruido (dosimetría), temperatura e iluminación. Alertas automáticas cuando se superan los TLV-TWA de la ACGIH.'},
+  qui:{titulo:'Gestión de sustancias químicas',icon:'ti-flask',chip:'Legal',chipCls:'chip-legal',desc:'Hojas de seguridad actualizadas (SDS), EPP específico por sustancia y procedimientos de manejo y disposición conforme a GHS/SGA.'},
+  bio2:{titulo:'Control de riesgo biológico',icon:'ti-virus',chip:'Legal',chipCls:'chip-legal',desc:'Protocolo de bioseguridad, vacunación obligatoria, EPB nivel 2 y procedimientos de manejo de residuos hospitalarios (RES 1164/2002).'},
+  loc:{titulo:'Inspecciones de seguridad locativa',icon:'ti-building',chip:'Auto',chipCls:'chip-auto',desc:'Checklist mensual de condiciones locativas. Registro fotográfico de hallazgos y seguimiento a correctivos con firma digital.'},
+};
+
+// ════════════════════════════════════════
+// LOGO UPLOAD
+// ════════════════════════════════════════
+function handleLogoUpload(event){
+  var file = event.target.files[0];
+  if(!file) return;
+  if(file.size > 2*1024*1024){ alert('El archivo es demasiado grande. Máximo 2MB.'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    logoDataUrl = e.target.result;
+    var prev = document.getElementById('logoPreviewImg');
+    prev.src = logoDataUrl; prev.style.display='block';
+    document.getElementById('logoUploadText').style.display='none';
+    actualizarLogosResultado();
+    guardarSesion();
+  };
+  reader.readAsDataURL(file);
+}
+
+function syncSectorInput(){
+  var sel = document.getElementById('empSectorSel').value;
+  if(sel && sel !== 'Otro') document.getElementById('empSector').value = sel;
+}
+
+function actualizarLogosResultado(){
+  var topImg = document.getElementById('topbarLogoImg');
+  var resImg = document.getElementById('resLogoImg');
+  var resSeal = document.getElementById('resSeal');
+  if(logoDataUrl){
+    topImg.src = logoDataUrl; topImg.style.display='block';
+    resImg.src = logoDataUrl; resImg.style.display='block';
+    resSeal.style.display='none';
+  } else {
+    topImg.style.display='none';
+    resImg.style.display='none';
+    resSeal.style.display='flex';
+  }
+}
+
+// ════════════════════════════════════════
+// SESIÓN (localStorage)
+// ════════════════════════════════════════
+function guardarSesion(){
+  try {
+    var data = { empresa:empresa, colaboradores:colaboradores, logoDataUrl:logoDataUrl, ts: Date.now() };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e){}
+}
+
+function cargarSesion(){
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    var data = JSON.parse(raw);
+    empresa = data.empresa || {};
+    colaboradores = data.colaboradores || [];
+    logoDataUrl = data.logoDataUrl || '';
+    document.getElementById('sessionBanner').style.display='none';
+    repoblarEmpresa();
+    actualizarLogosResultado();
+    if(logoDataUrl){
+      document.getElementById('logoPreviewImg').src=logoDataUrl;
+      document.getElementById('logoPreviewImg').style.display='block';
+      document.getElementById('logoUploadText').style.display='none';
+    }
+    // Ir al último paso útil
+    if(colaboradores.length>0) goStep(1);
+    else goStep(0);
+  } catch(e){ descartarSesion(); }
+}
+
+function descartarSesion(){
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  document.getElementById('sessionBanner').style.display='none';
+}
+
+function repoblarEmpresa(){
+  var m = ['empNombre','empNit','empSector','empCiudad','empResponsable','empArl'];
+  var k = ['nombre','nit','sector','ciudad','responsable','arl'];
+  m.forEach(function(id,i){ if(empresa[k[i]]) document.getElementById(id).value=empresa[k[i]]; });
+  if(empresa.riesgo) document.getElementById('empRiesgo').value=empresa.riesgo;
+  if(empresa.modalidad) document.getElementById('empModalidad').value=empresa.modalidad;
+}
+
+// ════════════════════════════════════════
+// NR / NIVEL
+// ════════════════════════════════════════
+function nrNivel(nr){
+  if(nr>=20) return {txt:'Muy Alto',cls:'niv-muyalto',color:'#c0392b',prioridad:'Inmediata'};
+  if(nr>=15) return {txt:'Alto',cls:'niv-alto',color:'#d4861b',prioridad:'Corto plazo'};
+  if(nr>=8)  return {txt:'Medio',cls:'niv-medio',color:'#2980b9',prioridad:'Mediano plazo'};
+  return {txt:'Bajo',cls:'niv-bajo',color:'#1a7a4a',prioridad:'Largo plazo'};
+}
+function initials(n){ return n.split(' ').filter(Boolean).slice(0,2).map(function(x){return x[0].toUpperCase();}).join(''); }
+
+// ════════════════════════════════════════
+// PASOS
+// ════════════════════════════════════════
+var STEPS=[
+  {title:'Paso 1 de 4 — Datos de la empresa',sub:'Complete la información general antes de continuar'},
+  {title:'Paso 2 de 4 — Registro de colaboradores',sub:'Agregue todos los colaboradores de la organización'},
+  {title:'Paso 3 de 4 — Evaluación de riesgos',sub:'Evalúe los riesgos para cada colaborador según sector'},
+  {title:'Paso 4 de 4 — Resultado',sub:'Matriz generada y resumen ejecutivo de cumplimiento'},
+];
+var PROG_W=['0%','33%','66%','100%'];
+
+function stepActualNum(){
+  for(var i=0;i<4;i++) if(document.getElementById('step'+i).style.display!=='none') return i;
+  return 0;
+}
+
+function goStep(s){
+  var actual = stepActualNum();
+  // Guardar empresa al salir del paso 0
+  if(actual===0 && s===1){
+    empresa.nombre=document.getElementById('empNombre').value.trim();
+    empresa.nit=document.getElementById('empNit').value.trim();
+    empresa.riesgo=document.getElementById('empRiesgo').value;
+    empresa.modalidad=document.getElementById('empModalidad').value;
+    empresa.sector=document.getElementById('empSector').value.trim() || document.getElementById('empSectorSel').value;
+    empresa.ciudad=document.getElementById('empCiudad').value.trim();
+    empresa.responsable=document.getElementById('empResponsable').value.trim();
+    empresa.arl=document.getElementById('empArl').value.trim();
+    if(!empresa.nombre){alert('Por favor ingrese la razón social.');return;}
+    guardarSesion();
+  }
+  // Repoblar empresa al regresar
+  if(s===0){ repoblarEmpresa(); }
+  // Validar colaboradores al avanzar
+  if(actual===1 && s===2){
+    if(colaboradores.length===0){alert('Agregue al menos un colaborador para continuar.');return;}
+    colabActual=0; renderRiesgoForm();
+    guardarSesion();
+  }
+  // Repoblar lista al regresar
+  if(s===1){ renderColabList(); }
+  // Editar riesgos desde resultado
+  if(s===2 && actual===3){ colabActual=0; renderRiesgoForm(); }
+  // Generar resultado
+  if(s===3){ guardarRiesgoActual(); generarResultado(); guardarSesion(); }
+
+  for(var i=0;i<4;i++){
+    document.getElementById('step'+i).style.display=i===s?'block':'none';
+    document.getElementById('sd'+i).className='step-dot'+(i<s?' done':i===s?' active':'');
+  }
+  document.getElementById('progFill').style.width=PROG_W[s];
+  document.getElementById('progTitle').textContent=STEPS[s].title;
+  document.getElementById('progSub').textContent=STEPS[s].sub;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ════════════════════════════════════════
+// COLABORADORES
+// ════════════════════════════════════════
+function agregarColab(){
+  var n=document.getElementById('cNombre').value.trim();
+  var c=document.getElementById('cCargo').value.trim();
+  var p=document.getElementById('cProceso').value.trim();
+  var a=document.getElementById('cAntiguedad').value;
+  if(!n||!c){alert('Ingrese nombre y cargo del colaborador.');return;}
+  colaboradores.push({nombre:n,cargo:c,proceso:p||'General',antiguedad:a,riesgos:{}});
+  document.getElementById('cNombre').value='';
+  document.getElementById('cCargo').value='';
+  document.getElementById('cProceso').value='';
+  renderColabList();
+  guardarSesion();
+}
+
+function renderColabList(){
+  var el=document.getElementById('colabList');
+  if(colaboradores.length===0){
+    el.innerHTML='<div class="empty"><i class="ti ti-user-plus"></i><p>Aún no hay colaboradores registrados.<br>Complete el formulario y haga clic en "Agregar".</p></div>';
+    return;
+  }
+  var html='';
+  colaboradores.forEach(function(c,i){
+    html+='<div class="colab-card">'
+      +'<div class="colab-avatar">'+initials(c.nombre)+'</div>'
+      +'<div class="colab-info">'
+        +'<div class="colab-name">'+c.nombre+'</div>'
+        +'<div class="colab-role">'+c.cargo+' · '+c.proceso+'</div>'
+        +'<div style="font-size:10px;color:var(--muted);margin-top:3px">'+c.antiguedad+'</div>'
+      +'</div>'
+      +'<div class="colab-actions">'
+        +'<button class="btn btn-danger" onclick="eliminarColab('+i+')"><i class="ti ti-trash"></i></button>'
+      +'</div>'
+    +'</div>';
+  });
+  el.innerHTML=html;
+}
+
+function eliminarColab(i){ colaboradores.splice(i,1); renderColabList(); guardarSesion(); }
+
+// ════════════════════════════════════════
+// RIESGOS
+// ════════════════════════════════════════
+function renderRiesgoForm(){
+  var c=colaboradores[colabActual];
+  var total=colaboradores.length;
+  var RIESGOS_DEF=getRiesgosDef();
+  var card=document.getElementById('riesgoCard');
+  var sectorTag = empresa.sector ? '<span class="sector-tag"><i class="ti ti-building"></i>'+empresa.sector+'</span>' : '';
+
+  card.innerHTML='<div class="card-title"><i class="ti ti-shield"></i>'
+    +' Evaluación de riesgos &nbsp;·&nbsp; <span style="color:var(--muted);font-weight:400">'+c.nombre+' — '+c.cargo+'</span>'
+    +'<span style="margin-left:auto;font-size:11px;color:var(--muted);font-weight:400">'+(colabActual+1)+' / '+total+'</span></div>'
+    + sectorTag
+    +'<div class="riesgo-group" id="riesgoGrupo"></div>';
+
+  var grupo=document.getElementById('riesgoGrupo');
+  RIESGOS_DEF.forEach(function(r){
+    var prev=c.riesgos[r.id]||{p:3,c:3};
+    var nr=prev.p*prev.c;
+    var nv=nrNivel(nr);
+    var div=document.createElement('div');
+    div.className='riesgo-item';
+    div.innerHTML='<div class="riesgo-header">'
+        +'<div class="riesgo-name">'+r.label+'</div>'
+        +'<span class="riesgo-badge '+r.badge+'">'+r.label+'</span>'
+      +'</div>'
+      +'<div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.5">'
+        +'<b>Peligro:</b> '+r.peligro+'<br><b>Efecto:</b> '+r.efecto
+      +'</div>'
+      +'<div class="slider-row">'
+        +'<div class="slider-field">'
+          +'<label>Probabilidad (P): <span class="slider-val" id="valP_'+r.id+'">'+prev.p+'</span></label>'
+          +'<input type="range" min="1" max="6" value="'+prev.p+'" id="slP_'+r.id+'" oninput="updNR(\''+r.id+'\')">'
+          +'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted)"><span>Muy baja</span><span>Muy alta</span></div>'
+        +'</div>'
+        +'<div class="slider-field">'
+          +'<label>Consecuencia (C): <span class="slider-val" id="valC_'+r.id+'">'+prev.c+'</span></label>'
+          +'<input type="range" min="1" max="6" value="'+prev.c+'" id="slC_'+r.id+'" oninput="updNR(\''+r.id+'\')">'
+          +'<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--muted)"><span>Muy leve</span><span>Catastrófica</span></div>'
+        +'</div>'
+      +'</div>'
+      +'<div class="nr-display">'
+        +'<span style="font-size:11px;color:var(--muted)">NR = P × C =</span>'
+        +'<span class="nr-num" id="nr_'+r.id+'" style="color:'+nv.color+'">'+nr+'</span>'
+        +'<span class="nivel '+nv.cls+'" id="niv_'+r.id+'">'+nv.txt+'</span>'
+      +'</div>';
+    grupo.appendChild(div);
+  });
+
+  var btn=document.getElementById('btnSigColab');
+  if(colabActual===colaboradores.length-1){
+    btn.innerHTML='<i class="ti ti-chart-bar"></i> Generar matriz';
+    btn.className='btn btn-success';
+  } else {
+    btn.innerHTML='<i class="ti ti-arrow-right"></i> Siguiente colaborador';
+    btn.className='btn btn-primary';
+  }
+}
+
+function updNR(rid){
+  var p=parseInt(document.getElementById('slP_'+rid).value);
+  var c=parseInt(document.getElementById('slC_'+rid).value);
+  document.getElementById('valP_'+rid).textContent=p;
+  document.getElementById('valC_'+rid).textContent=c;
+  var nr=p*c; var nv=nrNivel(nr);
+  document.getElementById('nr_'+rid).textContent=nr;
+  document.getElementById('nr_'+rid).style.color=nv.color;
+  document.getElementById('niv_'+rid).textContent=nv.txt;
+  document.getElementById('niv_'+rid).className='nivel '+nv.cls;
+}
+
+function guardarRiesgoActual(){
+  if(!colaboradores.length) return;
+  var c=colaboradores[colabActual];
+  var RIESGOS_DEF=getRiesgosDef();
+  RIESGOS_DEF.forEach(function(r){
+    var pEl=document.getElementById('slP_'+r.id);
+    var cEl=document.getElementById('slC_'+r.id);
+    if(pEl&&cEl) c.riesgos[r.id]={p:parseInt(pEl.value),c:parseInt(cEl.value)};
+  });
+}
+
+function siguienteColab(){
+  guardarRiesgoActual();
+  guardarSesion();
+  if(colabActual<colaboradores.length-1){ colabActual++; renderRiesgoForm(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else goStep(3);
+}
+
+function anteriorColab(){
+  guardarRiesgoActual();
+  if(colabActual>0){ colabActual--; renderRiesgoForm(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else goStep(1);
+}
+
+// ════════════════════════════════════════
+// RESULTADO
+// ════════════════════════════════════════
+function generarResultado(){
+  var RIESGOS_DEF=getRiesgosDef();
+  var hoy=new Date();
+  var fecha=hoy.toLocaleDateString('es-CO',{year:'numeric',month:'long',day:'numeric'});
+  var n=empresa.nombre||'La empresa';
+  var totalColabs=colaboradores.length;
+  var totalRiesgos=totalColabs*RIESGOS_DEF.length;
+  var muyAlto=0,alto=0,medio=0,bajo=0;
+
+  colaboradores.forEach(function(c){
+    RIESGOS_DEF.forEach(function(r){
+      var ri=c.riesgos[r.id]||{p:3,c:3};
+      var nv=nrNivel(ri.p*ri.c);
+      if(nv.txt==='Muy Alto') muyAlto++;
+      else if(nv.txt==='Alto') alto++;
+      else if(nv.txt==='Medio') medio++;
+      else bajo++;
+    });
+  });
+
+  actualizarLogosResultado();
+  document.getElementById('resTitle').textContent='Matriz GTC-45 · '+n;
+  document.getElementById('resSub').textContent='Generado el '+fecha+' · EUNOia SST Labs';
+
+  document.getElementById('kpiRow').innerHTML=
+    '<div class="kpi"><div class="kpi-label">Riesgos evaluados</div><div class="kpi-val purple">'+totalRiesgos+'</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Muy Alto / Alto</div><div class="kpi-val danger">'+(muyAlto+alto)+'</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Nivel Medio</div><div class="kpi-val warning">'+medio+'</div></div>'
+    +'<div class="kpi"><div class="kpi-label">Nivel Bajo</div><div class="kpi-val ok">'+bajo+'</div></div>';
+
+  document.getElementById('resBody').innerHTML=
+    'Certifica que <b>'+n+'</b>'+(empresa.nit?' (NIT: '+empresa.nit+')':'')
+    +', empresa del sector <b>'+(empresa.sector||'—')+'</b>'
+    +', modalidad <b>'+(empresa.modalidad||'—')+'</b>'
+    +', Riesgo Clase <b>'+(empresa.riesgo||'I')+'</b>, ARL <b>'+(empresa.arl||'—')+'</b>'
+    +', con <b>'+totalColabs+'</b> colaborador(es), ha completado la identificación de peligros y valoración de riesgos'
+    +' conforme a <b>GTC-45</b>, Resolución 0312/2019 y Circular 0027 MinTrabajo 2026.'
+    +' Responsable SG-SST: <b>'+(empresa.responsable||'—')+'</b>.';
+
+  // TABLA
+  var tbody=document.getElementById('gtcBody');
+  tbody.innerHTML='';
+  colaboradores.forEach(function(c){
+    RIESGOS_DEF.forEach(function(r){
+      var ri=c.riesgos[r.id]||{p:3,c:3};
+      var nr=ri.p*ri.c; var nv=nrNivel(nr);
+      var pct=Math.round((nr/36)*48);
+      var tr=document.createElement('tr');
+      tr.innerHTML='<td class="emp-cell">'+c.nombre+'<div style="font-size:10px;color:var(--muted);font-weight:400">'+c.cargo+'</div></td>'
+        +'<td>'+c.proceso+'</td>'
+        +'<td style="font-size:10.5px">'+r.peligro+'</td>'
+        +'<td style="font-size:10.5px">'+r.efecto+'</td>'
+        +'<td>'+ri.p+'</td><td>'+ri.c+'</td>'
+        +'<td><b style="color:'+nv.color+'">'+nr+'</b><div class="bar-outer"><div class="bar-inner" style="width:'+pct+'px;background:'+nv.color+'"></div></div></td>'
+        +'<td><span class="nivel '+nv.cls+'">'+nv.txt+'</span></td>'
+        +'<td>'+nv.prioridad+'</td>';
+      tbody.appendChild(tr);
+    });
+  });
+
+  // CUMPLIMIENTO
+  var checks=[
+    {ok:!!(empresa.responsable),txt:'Asignación de persona responsable del SG-SST'},
+    {ok:totalColabs>0,txt:'Colaboradores registrados y afiliados al Sistema de Seguridad Social'},
+    {ok:totalRiesgos>0,txt:'Identificación de peligros y valoración de riesgos (GTC-45) realizada'},
+    {ok:true,txt:'Plan anual de trabajo SG-SST generado por plataforma EUNOia SST Labs'},
+    {ok:true,txt:'Capacitaciones SST programadas en módulo EUNOia'},
+    {ok:false,txt:'Evaluaciones médicas ocupacionales · Pendiente de programar'},
+    {ok:false,txt:'Conformación COPASST virtual · Pendiente de convocar'},
+  ];
+  var cumplidos=checks.filter(function(x){return x.ok;}).length;
+  var pct=Math.round((cumplidos/checks.length)*100);
+  document.getElementById('pctLabel').textContent=pct+'%';
+  document.getElementById('progCumpl').style.width=pct+'%';
+  var cl=document.getElementById('checkList'); cl.innerHTML='';
+  checks.forEach(function(ch){
+    var d=document.createElement('div');
+    d.className='check-item'; d.style.color=ch.ok?'var(--text)':'var(--warning)';
+    d.innerHTML='<i class="ti '+(ch.ok?'ti-circle-check':'ti-clock')+' check-icon" style="color:'+(ch.ok?'var(--ok)':'var(--warning)')+'"></i><span>'+ch.txt+'</span>';
+    cl.appendChild(d);
+  });
+
+  // INTERVENCIONES
+  var box=document.getElementById('intervencionesBox'); box.innerHTML='';
+  var vistos={};
+  RIESGOS_DEF.forEach(function(r){
+    var maxNR=0;
+    colaboradores.forEach(function(c){ var ri=c.riesgos[r.id]||{p:3,c:3}; maxNR=Math.max(maxNR,ri.p*ri.c); });
+    if(maxNR>=8 && !vistos[r.id]){
+      vistos[r.id]=true;
+      var iv=INTERVENCIONES_DB[r.id]||INTERVENCIONES_DB['bio'];
+      var nv=nrNivel(maxNR);
+      var d=document.createElement('div');
+      d.className='int-card';
+      d.innerHTML='<h3><i class="ti '+iv.icon+'"></i> '+iv.titulo+' <span class="chip '+iv.chipCls+'">'+iv.chip+'</span><span class="nivel '+nv.cls+'" style="margin-left:auto">'+nv.txt+'</span></h3>'
+        +'<p>'+iv.desc+'</p>';
+      box.appendChild(d);
+    }
+  });
+  // Siempre añadir firmas digitales
+  var fd=document.createElement('div'); fd.className='int-card';
+  fd.innerHTML='<h3><i class="ti ti-signature"></i> Firmas digitales <span class="chip chip-legal">Legal</span></h3>'
+    +'<p>Actas de capacitación, entrega de dotación y compromisos de autocuidado firmados con estampa de tiempo RFC 3161.</p>';
+  box.appendChild(fd);
+}
+
+// ════════════════════════════════════════
+// EDITAR / REINICIAR
+// ════════════════════════════════════════
+function editarRiesgos(){
+  colabActual=0; renderRiesgoForm();
+  for(var i=0;i<4;i++){
+    document.getElementById('step'+i).style.display=i===2?'block':'none';
+    document.getElementById('sd'+i).className='step-dot'+(i<2?' done':i===2?' active':'');
+  }
+  document.getElementById('progFill').style.width='66%';
+  document.getElementById('progTitle').textContent=STEPS[2].title;
+  document.getElementById('progSub').textContent=STEPS[2].sub;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function reiniciar(){
+  if(!confirm('¿Desea iniciar una nueva matriz? Se borrarán todos los datos actuales.')) return;
+  empresa={};colaboradores=[];colabActual=0;logoDataUrl='';
+  ['empNombre','empNit','empSector','empCiudad','empResponsable','empArl'].forEach(function(id){ document.getElementById(id).value=''; });
+  document.getElementById('empSectorSel').value='';
+  document.getElementById('logoPreviewImg').style.display='none';
+  document.getElementById('logoUploadText').style.display='block';
+  document.getElementById('topbarLogoImg').style.display='none';
+  try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  renderColabList();
+  goStep(0);
+}
+
+// ════════════════════════════════════════
+// INIT — revisar sesión guardada
+// ════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', function(){
+  renderColabList();
+  try {
+    var raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      var data = JSON.parse(raw);
+      if(data && data.empresa && data.empresa.nombre){
+        var haceMin = Math.round((Date.now()-(data.ts||0))/60000);
+        var cuando = haceMin<60 ? 'hace '+haceMin+' min' : 'sesión anterior guardada';
+        document.getElementById('sessionBannerText').textContent =
+          'Sesión guardada: '+data.empresa.nombre+' ('+cuando+'). ¿Desea continuar?';
+        document.getElementById('sessionBanner').style.display='flex';
+      }
+    }
+  } catch(e){}
+});
+</script>
+</body>
+</html>
